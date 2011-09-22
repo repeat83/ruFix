@@ -1,0 +1,5 @@
+name: ruFix
+main: me.repeat.ruFix.ruFix
+version: 0.43
+author: repeat
+description: BugFix for Russian chat in Windows
