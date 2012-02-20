@@ -10,7 +10,8 @@ import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.config.Configuration;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public class ruFix extends JavaPlugin {
 
@@ -26,6 +27,8 @@ public class ruFix extends JavaPlugin {
 	
 	public static String prefix = null;
 
+	private FileConfiguration config = null;
+	private File configFile = null;
 	
 	@Override
 	public void onEnable() { 
@@ -52,9 +55,14 @@ public class ruFix extends JavaPlugin {
 // в PLAYER_CHAT Event.Priority.Lowest - важен дл€ выполнени€ перекодировки и применени€ еЄ дл€ всех эвентов		
 // Lowest - выполн€етс€ одним из первых
 // Highest - выполн€етс€ одним из последних
-		pm.registerEvent(Event.Type.PLAYER_CHAT, PlayerListener, Event.Priority.Lowest, this);
-		pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, PlayerListener, Event.Priority.Lowest, this);
-		pm.registerEvent(Event.Type.SERVER_COMMAND, ServerListener, Event.Priority.Lowest, this);
+		
+		pm.registerEvents(PlayerListener, this);
+		pm.registerEvents(ServerListener, this); // закомментируйте эту строчку и плагин не будет фильтровать сообщения из консоли
+		
+		// ниже - старые ивенты. Я не знаю зачем они тут, просто чтоб не потерялись.
+		//pm.registerEvent(Event.Type.PLAYER_CHAT, PlayerListener, Event.Priority.Lowest, this);
+		//pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, PlayerListener, Event.Priority.Lowest, this);
+		//pm.registerEvent(Event.Type.SERVER_COMMAND, ServerListener, Event.Priority.Lowest, this);
 
 	
 		readTables();
@@ -64,9 +72,16 @@ public class ruFix extends JavaPlugin {
 	public void onDisable(){ 
 		Logger.getLogger("Minecraft").info( prefix + " is disabled!" );
 	}
-
-	private void writeNode(String node, Object value, Configuration config){
-		if (config.getProperty(node) == null) config.setProperty(node, value);
+	
+    public void saveConfig() {
+	     if (config == null || configFile == null) {
+	     return;
+	     }
+	     try {
+ 	         config.save(configFile);
+ 	     } catch (IOException ex) {
+	         Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Could not save config to " + configFile, ex);
+	     }
 	}
 	
 	private void readConfig() {
@@ -78,20 +93,24 @@ public class ruFix extends JavaPlugin {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	Configuration config = new Configuration(file);
-    	config.load();
-    	writeNode("Console", "UTF-8", config);
-    	writeNode("LogFile", "UTF-8", config);
-    	writeNode("Debug", false, config);
+    	//старые конфиги. deprecated.
+    	//Configuration config = new Configuration(file);
+    	
+    	config = YamlConfiguration.loadConfiguration(configFile);
+    	
+    	//config.load();
+    	//writeNode("Console", "UTF-8", config);
+    	//writeNode("LogFile", "UTF-8", config);
+    	//writeNode("Debug", false, config);
 
     	List<String> tables = new ArrayList<String>();
    	 
     	tables.add("ru");
 //    	tables.add("gr");
     	 
-    	writeNode("Tables", tables, config);
+    	//writeNode("Tables", tables, config);
     	
-    	config.save();
+    	saveConfig();
 
     	ruFixDebug = config.getBoolean("Debug", false);
     	ruFixConsole = config.getString("Console", "UTF-8");
@@ -106,18 +125,20 @@ public class ruFix extends JavaPlugin {
     }
 
 	private void readTables() {
-		File file = new File(getDataFolder(), "config.yml");
-		Configuration config = new Configuration(file);
-    	config.load();
+		// старые конфиги. deprecated.
+		//File file = new File(getDataFolder(), "config.yml");
+		//Configuration config = new Configuration(file);
+    	//config.load();
+		
+		File configFile = new File(getDataFolder(), "config.yml");
+	    config = YamlConfiguration.loadConfiguration(configFile);
 
-		List<String> fixTables = config.getStringList("Tables", null);
+		List<String> fixTables = config.getStringList("Tables");
     	
-    	if (fixTables == null) {
-    		//not read
-    	} else {
+    	if (fixTables != null) {
     		for (String fixTable : fixTables)
             {
-    	    	file = new File(getDataFolder(), fixTable+".tbl");
+    			File file = new File(getDataFolder(), fixTable + ".tbl");
     	    	FileReader input;
 				try {
 					input = new FileReader(file);

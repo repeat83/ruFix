@@ -1,14 +1,15 @@
 package me.repeat.ruFix;
 
 import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.event.server.ServerListener;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
-public class ruFixServerListener extends ServerListener{
+public class ruFixServerListener implements Listener{
 
 	public static ruFix plugin; public ruFixServerListener(ruFix instance) {
         plugin = instance;
     }
-	
+	@EventHandler
     public void onServerCommand(ServerCommandEvent event) {
 
     	byte[] message = event.getCommand().getBytes();
