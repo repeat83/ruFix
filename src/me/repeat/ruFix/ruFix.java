@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.*;
 
-import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,6 +20,7 @@ public class ruFix extends JavaPlugin {
 	public static boolean ruFixDebug = false;
 	public static String ruFixConsole = "UTF-8";
 	public static String ruFixLogFile = "UTF-8";
+	public static boolean parseConsole = true;
 
 	public static char[] fromGame = {};
 	public static char[] toGame = {};
@@ -57,8 +57,9 @@ public class ruFix extends JavaPlugin {
 // Highest - выполн€етс€ одним из последних
 		
 		pm.registerEvents(PlayerListener, this);
-		pm.registerEvents(ServerListener, this); // закомментируйте эту строчку и плагин не будет фильтровать сообщения из консоли
-		
+		if (parseConsole) {
+			pm.registerEvents(ServerListener, this); // закомментируйте эту строчку и плагин не будет фильтровать сообщения из консоли
+		}
 		// ниже - старые ивенты. Я не знаю зачем они тут, просто чтоб не потерялись.
 		//pm.registerEvent(Event.Type.PLAYER_CHAT, PlayerListener, Event.Priority.Lowest, this);
 		//pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, PlayerListener, Event.Priority.Lowest, this);
@@ -113,6 +114,7 @@ public class ruFix extends JavaPlugin {
     	saveConfig();
 
     	ruFixDebug = config.getBoolean("Debug", false);
+    	parseConsole = config.getBoolean("ParseConsole", true);
     	ruFixConsole = config.getString("Console", "UTF-8");
     	ruFixLogFile = config.getString("LogFile", "UTF-8");
     	
