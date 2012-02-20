@@ -42,8 +42,13 @@ public class ruFixServerListener extends ServerListener{
             	text += (char)c;
             }
         }
-        if (System.getProperty("ruFixDebug") != null)
+        if (ruFix.ruFixDebug && event.getCommand().length() > 0 )
         	System.out.print("[ruFixDebug]:" + event.getCommand() + ":");
 		event.setCommand(text);
-	}
+
+		// correction when sending second of line at chat with option '-nojline'
+		// this correction have effect when press Enter without any command
+		if (event.getCommand().length() == 0)
+			event.setCommand("/");
+    }
 }
