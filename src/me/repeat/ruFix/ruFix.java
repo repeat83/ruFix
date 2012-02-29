@@ -21,6 +21,7 @@ public class ruFix extends JavaPlugin {
 	public static String ruFixConsole = "UTF-8";
 	public static String ruFixLogFile = "UTF-8";
 	public static boolean parseConsole = true;
+	public static File directory;
 
 	public static char[] fromGame = {};
 	public static char[] toGame = {};
@@ -32,6 +33,8 @@ public class ruFix extends JavaPlugin {
 	
 	@Override
 	public void onEnable() { 
+		
+		directory = this.getDataFolder();
 
         PluginDescriptionFile pdfFile = this.getDescription();
 		prefix = "[" + pdfFile.getName()+ "]";
@@ -58,14 +61,13 @@ public class ruFix extends JavaPlugin {
 		
 		pm.registerEvents(PlayerListener, this);
 		if (parseConsole) {
-			pm.registerEvents(ServerListener, this); // закомментируйте эту строчку и плагин не будет фильтровать сообщения из консоли
+			pm.registerEvents(ServerListener, this);
 		}
 		// ниже - старые ивенты. Я не знаю зачем они тут, просто чтоб не потерялись.
 		//pm.registerEvent(Event.Type.PLAYER_CHAT, PlayerListener, Event.Priority.Lowest, this);
 		//pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, PlayerListener, Event.Priority.Lowest, this);
 		//pm.registerEvent(Event.Type.SERVER_COMMAND, ServerListener, Event.Priority.Lowest, this);
 
-	
 		readTables();
 	}
 
@@ -84,16 +86,82 @@ public class ruFix extends JavaPlugin {
 	         Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Could not save config to " + configFile, ex);
 	     }
 	}
+    
+    private void placeFiles() {
+
+        boolean configExists = false;
+        boolean langTableExists = false;
+        
+        if (directory.exists()) {
+            for (String f : directory.list()) {
+                if (f.equalsIgnoreCase("config.yml"))
+                	configExists = true;
+                if (f.equalsIgnoreCase("ru.tbl"))
+                	langTableExists = true;
+            }
+        } else {
+        	directory.mkdir();
+        }
+        
+        
+        if (!configExists | !langTableExists) {
+            for (int x = 0; x <= 1; x++) {
+                boolean writeFile = true;
+                
+                try {
+                    InputStream defaultStream = null;
+                    File conf = null;
+                    
+                    switch (x) {
+                    case 0:
+                    	System.out.print("[ruFix]: WRITING DEFAULT CONFIG");
+                        defaultStream = this.getClass().getResourceAsStream("/config.yml");
+                        conf = new File(directory + File.separator +"config.yml");
+                        if (configExists)
+                            writeFile = false;
+                        break;
+                    case 1:
+                    	System.out.print("[ruFix]: WRITING DEFAULT LANGUAGE TABLE (RU)");
+                        defaultStream = this.getClass().getResourceAsStream("/ru.tbl");
+                        conf = new File(directory + File.separator +"ru.tbl");
+                        if (langTableExists)
+                            writeFile = false;
+                        break;
+                    }
+                    
+                    if (writeFile) {
+                        directory.mkdir();
+                        conf.createNewFile();
+                        
+                        OutputStream confStream = new FileOutputStream(conf);
+                        
+                        byte buf[] = new byte[1024];
+                        int len;
+                        
+                        while ((len = defaultStream.read(buf)) > 0) {
+                            confStream.write(buf, 0, len);
+                        }
+                        
+                        defaultStream.close();
+                        confStream.close();
+                    }
+                    
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 	
 	private void readConfig() {
-    	getDataFolder().mkdir();
-    	File file = new File(getDataFolder(), "config.yml");
-    	try {
-			file.createNewFile();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    	
+		placeFiles();
+    	File configFile = new File(directory, "config.yml");
+
     	//старые конфиги. deprecated.
     	//Configuration config = new Configuration(file);
     	
@@ -132,7 +200,7 @@ public class ruFix extends JavaPlugin {
 		//Configuration config = new Configuration(file);
     	//config.load();
 		
-		File configFile = new File(getDataFolder(), "config.yml");
+		File configFile = new File(directory, "config.yml");
 	    config = YamlConfiguration.loadConfiguration(configFile);
 
 		List<String> fixTables = config.getStringList("Tables");
@@ -140,7 +208,7 @@ public class ruFix extends JavaPlugin {
     	if (fixTables != null) {
     		for (String fixTable : fixTables)
             {
-    			File file = new File(getDataFolder(), fixTable + ".tbl");
+    			File file = new File(directory, fixTable + ".tbl");
     	    	FileReader input;
 				try {
 					input = new FileReader(file);
