@@ -9,6 +9,9 @@ import java.util.logging.*;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -55,14 +58,12 @@ public class ruFix extends JavaPlugin {
 
 		PluginManager pm = this.getServer().getPluginManager();
 
-// в PLAYER_CHAT Event.Priority.Lowest - важен дл€ выполнени€ перекодировки и применени€ еЄ дл€ всех эвентов		
-// Lowest - выполн€етс€ одним из первых
-// Highest - выполн€етс€ одним из последних
+// в PLAYER_CHAT Event.Priority.Lowest - важен для выполнения перекодировки и применения её для всех эвентов		
+// Lowest - выполняется одним из первых
+// Highest - выполняется одним из последних
 		
 		pm.registerEvents(PlayerListener, this);
-		if (parseConsole) {
-			pm.registerEvents(ServerListener, this);
-		}
+		pm.registerEvents(ServerListener, this);
 		// ниже - старые ивенты. Я не знаю зачем они тут, просто чтоб не потерялись.
 		//pm.registerEvent(Event.Type.PLAYER_CHAT, PlayerListener, Event.Priority.Lowest, this);
 		//pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, PlayerListener, Event.Priority.Lowest, this);
@@ -75,6 +76,21 @@ public class ruFix extends JavaPlugin {
 	public void onDisable(){ 
 		Logger.getLogger("Minecraft").info( prefix + " is disabled!" );
 	}
+	
+	 public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+	        return readCommand(sender, commandLabel, args);
+	    }
+
+	    public boolean readCommand(CommandSender sender, String command, String[] args) {
+	        if((command.equalsIgnoreCase("rufixreload")) && (sender instanceof ConsoleCommandSender)) {
+	        	this.reloadConfig();
+	        	readConfig();
+	        	readTables();
+	        	if (ruFixDebug) sender.sendMessage("ParseConsole is now " + parseConsole );
+	        	return true;
+	        }
+	        return false;
+	    }
 	
     public void saveConfig() {
 	     if (config == null || configFile == null) {
@@ -161,23 +177,13 @@ public class ruFix extends JavaPlugin {
     	
 		placeFiles();
     	File configFile = new File(directory, "config.yml");
-
-    	//старые конфиги. deprecated.
-    	//Configuration config = new Configuration(file);
     	
     	config = YamlConfiguration.loadConfiguration(configFile);
     	
-    	//config.load();
-    	//writeNode("Console", "UTF-8", config);
-    	//writeNode("LogFile", "UTF-8", config);
-    	//writeNode("Debug", false, config);
-
     	List<String> tables = new ArrayList<String>();
    	 
     	tables.add("ru");
 //    	tables.add("gr");
-    	 
-    	//writeNode("Tables", tables, config);
     	
     	saveConfig();
 
@@ -195,10 +201,6 @@ public class ruFix extends JavaPlugin {
     }
 
 	private void readTables() {
-		// старые конфиги. deprecated.
-		//File file = new File(getDataFolder(), "config.yml");
-		//Configuration config = new Configuration(file);
-    	//config.load();
 		
 		File configFile = new File(directory, "config.yml");
 	    config = YamlConfiguration.loadConfiguration(configFile);
