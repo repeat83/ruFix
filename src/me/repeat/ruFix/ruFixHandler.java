@@ -16,13 +16,17 @@ public class ruFixHandler {
 
 		for (Handler handler : handlers)
         {
-//			globalLogger.info("!!!: "+handler.getEncoding());
+			if (ruFix.ruFixDebug) {
+				globalLogger.info("[ruFixDebug]:"+ handler.toString() + " - была кодировка: "+handler.getEncoding());
+			}
 			//globalLogger.removeHandler(handler);
 			if (handler instanceof ConsoleHandler) {
 				try {
 					//console
-					handler.setEncoding(ruFix.ruFixConsole);
-					globalLogger.info(ruFix.prefix + " ruFixConsole: " + ruFix.ruFixConsole);
+					if (ruFix.parseConsole) {
+						handler.setEncoding(ruFix.ruFixConsole);
+						globalLogger.info(ruFix.prefix + " ruFixConsole: " + ruFix.ruFixConsole);
+					}
 				} catch (SecurityException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -35,8 +39,10 @@ public class ruFixHandler {
 			if (handler instanceof FileHandler) {
 				try {
 					// logfile
-					handler.setEncoding(ruFix.ruFixLogFile);
-					globalLogger.info(ruFix.prefix + " ruFixLogFile: " + ruFix.ruFixLogFile);
+					if (ruFix.parseLogFile) {
+						handler.setEncoding(ruFix.ruFixLogFile);
+						globalLogger.info(ruFix.prefix + " ruFixLogFile: " + ruFix.ruFixLogFile);
+					}
 				} catch (SecurityException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -45,7 +51,9 @@ public class ruFixHandler {
 					e.printStackTrace();
 				}
 			}
-//			globalLogger.info("@@@: "+handler.getEncoding());
+			if (ruFix.ruFixDebug) {
+				globalLogger.info("[ruFixDebug]:"+ handler.toString() + " - стала кодировка: " + handler.getEncoding());
+			}
 		}
 	}
 }

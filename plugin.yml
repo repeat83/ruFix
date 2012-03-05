@@ -7,4 +7,3 @@ description: BugFix for Russian chat
 commands:
   rufixreload:
     description: reloads config
-    

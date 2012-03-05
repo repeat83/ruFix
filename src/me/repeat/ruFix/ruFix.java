@@ -23,7 +23,10 @@ public class ruFix extends JavaPlugin {
 	public static boolean ruFixDebug = false;
 	public static String ruFixConsole = "UTF-8";
 	public static String ruFixLogFile = "UTF-8";
+	
 	public static boolean parseConsole = true;
+	public static boolean parseLogFile = true;
+
 	public static File directory;
 
 	public static char[] fromGame = {};
@@ -189,6 +192,7 @@ public class ruFix extends JavaPlugin {
 
     	ruFixDebug = config.getBoolean("Debug", false);
     	parseConsole = config.getBoolean("ParseConsole", true);
+    	parseLogFile = config.getBoolean("ParseLogFile", true);
     	ruFixConsole = config.getString("Console", "UTF-8");
     	ruFixLogFile = config.getString("LogFile", "UTF-8");
     	
