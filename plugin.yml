@@ -1,5 +1,9 @@
 name: ruFix
 main: me.repeat.ruFix.ruFix
-version: 0.43
-author: repeat
-description: BugFix for Russian chat in Windows
+version: 0.57
+author: repeat, toxuin
+description: BugFix for Russian chat
+
+commands:
+  rufixreload:
+    description: reloads config
